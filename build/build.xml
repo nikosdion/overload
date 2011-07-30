@@ -52,7 +52,7 @@
 	<target name="component-package" description="Component ZIP package"
 		depends="new-release">
 		
-		<zipme basedir="${dirs.component}" destfile="${dirs.release}/com_overlaod-${version}.zip" includeemptydirs="true">
+		<zipme basedir="${dirs.component}" destfile="${dirs.release}/com_overload-${version}.zip" includeemptydirs="true">
 			<fileset refid="component" />
 		</zipme>
 	</target>
