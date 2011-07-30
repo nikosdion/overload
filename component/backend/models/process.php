@@ -306,6 +306,7 @@ class OverloadModelProcess extends JModel
 			if(!$cat->published) {
 				$cat->published = 1;
 			}
+			$cat = (array)$cat;
 			$model->save($cat);
 			
 			return $id;
