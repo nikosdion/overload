@@ -274,7 +274,8 @@ class OverloadModelProcess extends JModel
 			'params'		=> array('target' => '', 'image' => ''),
 			'metadata'		=> array('page_title' => '', 'author' => '', 'robots' => ''),
 			'hits'			=> 0,
-			'language'		=> '*'
+			'language'		=> '*',
+			'published'		=> 1
 		);
 		
 		require_once JPATH_ADMINISTRATOR.'/components/com_categories/models/category.php';
@@ -291,6 +292,14 @@ class OverloadModelProcess extends JModel
 			$db->setQuery($query);
 			$id = $db->loadResult();
 			JLog::add("Existing category $levelpath, ID $id", JLog::DEBUG);
+			
+			// Enable an existing category
+			$cat = $model->getItem($id);
+			if(!$cat->published) {
+				$cat->published = 1;
+			}
+			$model->save($cat);
+			
 			return $id;
 		} else {
 			$id = $model->getState($model->getName().'.id');
@@ -346,7 +355,8 @@ ENDTEXT;
 			'access'		=> 1,
 			'hits'			=> 0,
 			'featured'		=> 0,
-			'language'		=> '*'
+			'language'		=> '*',
+			'published'		=> 1
 		);
 		
 		$db = $this->getDbo();
