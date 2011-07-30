@@ -64,6 +64,7 @@ Version 1.1 (July 30th, 2011)
 	~ Remove existing articles in a category before creating new ones
 	~ Article titles are now "Overload article 1234 in 1-2-3" so that they are unique
 	+ Images in introtext and fulltext
+	+ i18n for the component's interface
 
 Version 1.0 (July 29th, 2011)
 -----------------------------

@@ -13,7 +13,7 @@ jimport('joomla.application.component.view');
 class OverloadViewStart extends JView
 {
 	public function display($tpl = null) {
-		JToolBarHelper::title('Overload');
+		JToolBarHelper::title(JText::_('COM_OVERLOAD_TITLE'));
 		JHtml::_('behavior.framework');
 		
 		$script = <<<ENDSCRIPT
