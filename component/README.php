@@ -71,7 +71,8 @@ Version 1.1 (July 30th, 2011)
 --------------------------------------------------------------------------------
 # Categories were not enabled by default
 # Articles were not enabled by default
-		
+~ Remove existing articles in a category before creating new ones
+
 Version 1.0 (July 30th, 2011)
 --------------------------------------------------------------------------------
 First version

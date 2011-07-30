@@ -183,6 +183,14 @@ class OverloadModelProcess extends JModel
 				$level = array_shift($keys);
 				JLog::add('Beginning content creation in category '.$level);
 				$startFromArticle = 0;
+				
+				// Remove existing articles in category
+				$db = $this->getDbo();
+				$sql = $db->getQuery(true);
+				$sql->delete('#__content')
+					->where($db->quoteName('cat_id').' = '.$db->quote($level));
+				$db->setQuery($sql);
+				$db->query(); // Whoosh!
 			} else {
 				$startFromArticle = $this->getState('startfromarticle', 0);
 				JLog::add("Resuming content creation (article #$startFromArticle)", JLog::DEBUG);
