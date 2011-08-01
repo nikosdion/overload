@@ -54,7 +54,6 @@ function doAjax(data, successCallback)
 			try {
 				var data = JSON.parse(msg);
 			} catch(err) {
-				var msg = err.message + "\\n\\n";
 				alert(msg);
 				return;
 			}

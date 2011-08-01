@@ -141,7 +141,7 @@ class OverloadModelProcess extends JModel
 		
 		if(empty($saveData)) {
 			JLog::add('Nothing is saved in the session. Brace yourself, we are crashing!', JLog::ERROR);
-			die('KA-BOOM!');
+			die('Nothing is saved in the session. Brace yourself, we are crashing! ......... KA-BOOM! All passengers dead.');
 		}
 		
 		$this->setState('level', $saveData['level']);
@@ -183,14 +183,6 @@ class OverloadModelProcess extends JModel
 				$level = array_shift($keys);
 				JLog::add('Beginning content creation in category '.$level);
 				$startFromArticle = 0;
-				
-				// Remove existing articles in category
-				$db = $this->getDbo();
-				$sql = $db->getQuery(true);
-				$sql->delete('#__content')
-					->where($db->quoteName('cat_id').' = '.$db->quote($level));
-				$db->setQuery($sql);
-				$db->query(); // Whoosh!
 			} else {
 				$startFromArticle = $this->getState('startfromarticle', 0);
 				JLog::add("Resuming content creation (article #$startFromArticle)", JLog::DEBUG);
@@ -203,7 +195,7 @@ class OverloadModelProcess extends JModel
 			
 			for($currentArticle = $startFromArticle; $currentArticle < $articles; $currentArticle++) {
 				if(!$this->haveEnoughTime()) break;
-				$this->createArticle($level_id, $level, $currentArticle);
+				$this->createArticle_usingModel($level_id, $level, $currentArticle);
 			}
 			
 			if($currentArticle == $articles) {
@@ -247,6 +239,19 @@ class OverloadModelProcess extends JModel
 			$parent = ($level == 1) ? 1 : $levelMap[ implode('.',  array_slice($parts, 0, count($parts) - 1)) ];
 			$id = $this->createCategory($level, $key, $parent);
 			$levelMap[$key] = $id;
+			
+			// Remove articles from category
+			$db = $this->getDbo();
+
+			$query = 'DELETE FROM #__assets WHERE `id` IN (SELECT `asset_id` FROM `#__content` WHERE `cat_id` = '.$db->quote($id).')';
+			$db->setQuery($query);
+			$db->query(); // Whoosh!
+
+			$query = $db->getQuery(true);
+			$query->delete('#__content')
+				->where($db->nameQuote('catid').' = '.$db->quote($id));
+			$db->setQuery($query);
+			$db->query();
 		}
 		
 		JLog::add("Updating levelmap in model state", JLog::DEBUG);
@@ -330,7 +335,11 @@ class OverloadModelProcess extends JModel
 		
 		$db = $this->getDbo();
 		$data = (object)$data;
-		$result = $db->insertObject('#__content', $data);		
+		$data->attribs = json_encode($data->attribs);
+		$result = $db->insertObject('#__content', $data, 'id');
+		if(!$result) {
+			die($db->getErrorMsg());
+		}
 	}
 	
 		/**
@@ -372,8 +381,11 @@ ENDTEXT;
 $picture2<p>Nunc feugiat porta faucibus. Nulla facilisi. Sed viverra laoreet mollis. Morbi ullamcorper lorem a lacus porttitor tristique. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean <strong>consequat</strong> tincidunt lacinia. Maecenas dictum volutpat lacus, nec malesuada ipsum congue sed. Sed nec neque erat. Donec eros urna, vulputate ac elementum sit amet, pharetra sit amet urna. Phasellus in lectus metus. Proin vitae diam augue, vel lacinia lectus. Ut tincidunt, dolor sit amet hendrerit gravida, augue mauris bibendum sapien, nec porta ipsum diam eget erat. In porta nisl eget odio placerat gravida commodo tortor feugiat. Donec in tincidunt dui. In in neque tellus. Phasellus velit lacus, viverra et sodales nec, porta in velit.</p>
 <p>Etiam quis velit odio. Nunc dignissim enim vel enim blandit tempus. Integer pellentesque leo ac risus hendrerit sed consequat lacus elementum. Aenean placerat leo vitae nunc bibendum cursus. Ut ac dui diam. Vivamus massa tortor, consectetur at scelerisque eget, hendrerit et elit. Aliquam hendrerit quam posuere tellus sollicitudin sollicitudin. Ut eget lacinia metus. Curabitur vitae orci ac libero vestibulum commodo. Sed id nibh eu erat pretium tempus. Nullam suscipit fringilla tortor, ac pretium metus iaculis eu. Fusce pellentesque volutpat tortor, at interdum tortor blandit at. Morbi rhoncus euismod ultricies. Fusce sed massa at elit lobortis iaculis non id metus. Aliquam erat volutpat. Vivamus convallis mauris ut sapien tempus quis tempor nunc cursus. Quisque in lorem sem.</p>
 ENDTEXT;
+		jimport('joomla.utilities.date');
+		$jNow = new JDate();
 		
 		$data = array(
+			'id'			=> 0,
 			'title'			=> $title,
 			'alias'			=> $alias,
 			'introtext'		=> $introtext,
@@ -382,6 +394,7 @@ ENDTEXT;
 			'sectionid'		=> 0,
 			'mask'			=> 0,
 			'catid'			=> $cat_id,
+			'created'		=> $jNow->toMySQL(),
 			'created_by_alias' => 'Overload',
 			'attribs'		=> array(
 				"show_title"=>"","link_titles"=>"","show_intro"=>"","show_category"=>"","link_category"=>"","show_parent_category"=>"","link_parent_category"=>"","show_author"=>"","link_author"=>"","show_create_date"=>"","show_modify_date"=>"","show_publish_date"=>"","show_item_navigation"=>"","show_icons"=>"","show_print_icon"=>"","show_email_icon"=>"","show_vote"=>"","show_hits"=>"","show_noauth"=>"","alternative_readmore"=>"","article_layout"=>""
@@ -395,7 +408,7 @@ ENDTEXT;
 			'hits'			=> 0,
 			'featured'		=> 0,
 			'language'		=> '*',
-			'published'		=> 1
+			'state'			=> 1
 		);
 		
 		$db = $this->getDbo();

@@ -56,6 +56,14 @@ CHANGELOG
 The Changelog is provided in reverse chronological order.
 Legend: # Bug fix     + Addition     - Feature removal     ~ Change    ! Critical bug fix     ^ Minor edit
 
+Version 1.2 (August 1st, 2011)
+-----------------------------
+	# Articles not created
+	# Existing articles were not removed from the category before creating new ones
+	# Articles would not appear properly in the front-end without corresponding assets
+	  entries. Reverted to using the Joomla! articles model again, which is slow as
+	  hell due to the lft/rgt linked list approach Joomla! is using on the #__assets
+	  table.
 
 Version 1.1 (July 30th, 2011)
 -----------------------------
