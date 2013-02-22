@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE install SYSTEM "http://dev.joomla.org/xml/1.5/component-install.dtd">
-<install type="component" version="1.5.0" method="upgrade">
+<extension type="component" version="2.5.0" method="upgrade">
 	<name>Overload</name>
 	<creationDate>2011-07-30</creationDate>
 	<author>Nicholas K. Dionysopoulos</author>
@@ -33,4 +32,4 @@
 		</files>
 	</administration>
 
-</install>
+</extension>
