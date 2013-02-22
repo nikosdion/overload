@@ -290,9 +290,11 @@ class OverloadModelProcess extends JModel
 			'language'		=> '*',
 			'published'		=> 1
 		);
-		
-		require_once JPATH_ADMINISTRATOR.'/components/com_categories/models/category.php';
-		$model = new CategoriesModelCategory();
+
+		$basePath = JPATH_ADMINISTRATOR . '/components/com_categories';
+		require_once $basePath . '/models/category.php';
+		$config = array('table_path' => $basePath . '/tables');
+		$model = new CategoriesModelCategory($config);
 		$result = $model->save($data);
 		
 		if($result === false) {
