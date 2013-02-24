@@ -110,14 +110,15 @@ class OverloadModelProcess extends JModel
 		JLog::add('Saving model state to the session', JLog::DEBUG);
 		
 		$saveData = array(
-			'level'			=> $this->getState('level', 0),
-			'levelmap'		=> $this->getState('levelmap', array()),
-			'categories'	=> $this->getState('categories'),
-			'depth'			=> $this->getState('depth'),
-			'articles'		=> $this->getState('articles'),
-			'startfromarticle' => $this->getState('startfromarticle',0),
-			'totalcats'		=> $this->getState('totalcats', 0),
-			'donecats'		=> $this->getState('donecats', 0)
+			'level'				=> $this->getState('level', 0),
+			'levelmap'			=> $this->getState('levelmap', array()),
+			'categories'		=> $this->getState('categories'),
+			'depth'				=> $this->getState('depth'),
+			'articles'			=> $this->getState('articles'),
+			'articlesstate'		=> $this->getState('articlesstate'),
+			'startfromarticle' 	=> $this->getState('startfromarticle',0),
+			'totalcats'			=> $this->getState('totalcats', 0),
+			'donecats'			=> $this->getState('donecats', 0)
 		);
 		
 		$saveData = base64_encode(gzcompress(serialize($saveData), 9));
@@ -149,6 +150,7 @@ class OverloadModelProcess extends JModel
 		$this->setState('categories', $saveData['categories']);
 		$this->setState('depth', $saveData['depth']);
 		$this->setState('articles', $saveData['articles']);
+		$this->setState('articlesstate', $saveData['articlesstate']);
 		$this->setState('startfromarticle', $saveData['startfromarticle']);
 		$this->setState('totalcats', $saveData['totalcats']);
 		$this->setState('donecats', $saveData['donecats']);
@@ -290,9 +292,11 @@ class OverloadModelProcess extends JModel
 			'language'		=> '*',
 			'published'		=> 1
 		);
-		
-		require_once JPATH_ADMINISTRATOR.'/components/com_categories/models/category.php';
-		$model = new CategoriesModelCategory();
+
+		$basePath = JPATH_ADMINISTRATOR . '/components/com_categories';
+		require_once $basePath . '/models/category.php';
+		$config = array('table_path' => $basePath . '/tables');
+		$model = new CategoriesModelCategory($config);
 		$result = $model->save($data);
 		
 		if($result === false) {
@@ -383,14 +387,16 @@ $picture2<p>Nunc feugiat porta faucibus. Nulla facilisi. Sed viverra laoreet mol
 ENDTEXT;
 		jimport('joomla.utilities.date');
 		$jNow = new JDate();
-		
+
+		$state  = (int) $this->getState('articlesstate', 1);
+
 		$data = array(
 			'id'			=> 0,
 			'title'			=> $title,
 			'alias'			=> $alias,
 			'introtext'		=> $introtext,
 			'fulltext'		=> $fulltext,
-			'state'			=> 1,
+			'state'			=> $state,
 			'sectionid'		=> 0,
 			'mask'			=> 0,
 			'catid'			=> $cat_id,
@@ -408,10 +414,8 @@ ENDTEXT;
 			'hits'			=> 0,
 			'featured'		=> 0,
 			'language'		=> '*',
-			'state'			=> 1
+			'state'			=> $state
 		);
-		
-		$db = $this->getDbo();
 		
 		return $data;
 	}

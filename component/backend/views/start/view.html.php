@@ -83,8 +83,9 @@ function overload_start()
 	var cats = $('overload-cats').value;
 	var depth = $('overload-depth').value;
 	var articles = $('overload-articles').value;
-	
-	var data = 'categories='+cats+'&depth='+depth+'&articles='+articles+'&task=start';
+	var articlesstate = $('overload-articles-state').value;
+
+	var data = 'categories='+cats+'&depth='+depth+'&articles='+articles+'&articlesstate='+articlesstate+'&task=start';
 	
 	$('overload-wrapper').setStyle('display','none');
 	$('overload-results-wrapper').setStyle('display','block');

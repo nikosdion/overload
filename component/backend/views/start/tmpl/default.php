@@ -46,6 +46,14 @@ defined('_JEXEC') or die(); ?>
 		</tr>
 		<tr>
 			<td>
+				<label for="overload-articles-state"><?php echo JText::_('COM_OVERLOAD_CCOPTS_ARTICLES_STATE');?></label>
+			</td>
+			<td>
+				<input type="text" size="8" id="overload-articles-state" name="articlesstate" value="1" />
+			</td>
+		</tr>
+		<tr>
+			<td>
 				<?php echo JText::_('COM_OVERLOAD_PROJECTED_TITLE') ?>
 			</td>
 			<td>
