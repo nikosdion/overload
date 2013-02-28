@@ -243,13 +243,13 @@ class OverloadModelProcess extends FOFModel
 			// Remove articles from category
 			$db = $this->getDbo();
 
-			$query = 'DELETE FROM #__assets WHERE `id` IN (SELECT `asset_id` FROM `#__content` WHERE `cat_id` = '.$db->quote($id).')';
+			$query = 'DELETE FROM #__assets WHERE `id` IN (SELECT `asset_id` FROM `#__content` WHERE `cat_id` = '.$db->q($id).')';
 			$db->setQuery($query);
 			$db->query(); // Whoosh!
 
 			$query = $db->getQuery(true);
 			$query->delete('#__content')
-				->where($db->nameQuote('catid').' = '.$db->quote($id));
+				->where($db->qn('catid').' = '.$db->q($id));
 			$db->setQuery($query);
 			$db->query();
 		}
@@ -302,8 +302,8 @@ class OverloadModelProcess extends FOFModel
 			$query = $db->getQuery(true);
 			$query
 				->select('id')
-				->from( $db->quoteName('#__categories') )
-				->where($db->quoteName('alias').' = '.$db->quote($alias));
+				->from( $db->qn('#__categories') )
+				->where($db->qn('alias').' = '.$db->q($alias));
 			$db->setQuery($query);
 			$id = $db->loadResult();
 			JLog::add("Existing category $levelpath, ID $id", JLog::DEBUG);
