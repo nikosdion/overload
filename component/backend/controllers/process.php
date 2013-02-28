@@ -8,9 +8,7 @@
 
 defined('_JEXEC') or die();
 
-jimport('joomla.application.component.controller');
-
-class OverloadControllerProcess extends JController
+class OverloadControllerProcess extends FOFController
 {
 	public function start($cachable = false, $urlparams = false) {
 		$model = $this->getModel('Process', 'OverloadModel');
