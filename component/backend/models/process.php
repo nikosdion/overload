@@ -2,9 +2,7 @@
 
 defined('_JEXEC') or die();
 
-jimport('joomla.application.component.model');
-
-class OverloadModelProcess extends JModel
+class OverloadModelProcess extends FOFModel
 {
 	/** @var int Stores the timestamp when the real processing started */
 	private $_timerStart = null;
@@ -245,13 +243,13 @@ class OverloadModelProcess extends JModel
 			// Remove articles from category
 			$db = $this->getDbo();
 
-			$query = 'DELETE FROM #__assets WHERE `id` IN (SELECT `asset_id` FROM `#__content` WHERE `cat_id` = '.$db->quote($id).')';
+			$query = 'DELETE FROM #__assets WHERE `id` IN (SELECT `asset_id` FROM `#__content` WHERE `catid` = '.$db->q($id).')';
 			$db->setQuery($query);
 			$db->query(); // Whoosh!
 
 			$query = $db->getQuery(true);
 			$query->delete('#__content')
-				->where($db->nameQuote('catid').' = '.$db->quote($id));
+				->where($db->qn('catid').' = '.$db->q($id));
 			$db->setQuery($query);
 			$db->query();
 		}
@@ -304,8 +302,8 @@ class OverloadModelProcess extends JModel
 			$query = $db->getQuery(true);
 			$query
 				->select('id')
-				->from( $db->quoteName('#__categories') )
-				->where($db->quoteName('alias').' = '.$db->quote($alias));
+				->from( $db->qn('#__categories') )
+				->where($db->qn('alias').' = '.$db->q($alias));
 			$db->setQuery($query);
 			$id = $db->loadResult();
 			JLog::add("Existing category $levelpath, ID $id", JLog::DEBUG);
@@ -388,6 +386,12 @@ ENDTEXT;
 		jimport('joomla.utilities.date');
 		$jNow = new JDate();
 
+		if (version_compare(JVERSION, '3.0', 'ge')) {
+			$now = $jNow->toSql();
+		} else {
+			$now = $jNow->toMysql();
+		}
+
 		$state  = (int) $this->getState('articlesstate', 1);
 
 		$data = array(
@@ -400,7 +404,7 @@ ENDTEXT;
 			'sectionid'		=> 0,
 			'mask'			=> 0,
 			'catid'			=> $cat_id,
-			'created'		=> $jNow->toMySQL(),
+			'created'		=> $now,
 			'created_by_alias' => 'Overload',
 			'attribs'		=> array(
 				"show_title"=>"","link_titles"=>"","show_intro"=>"","show_category"=>"","link_category"=>"","show_parent_category"=>"","link_parent_category"=>"","show_author"=>"","link_author"=>"","show_create_date"=>"","show_modify_date"=>"","show_publish_date"=>"","show_item_navigation"=>"","show_icons"=>"","show_print_icon"=>"","show_email_icon"=>"","show_vote"=>"","show_hits"=>"","show_noauth"=>"","alternative_readmore"=>"","article_layout"=>""
