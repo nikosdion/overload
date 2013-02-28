@@ -386,6 +386,12 @@ ENDTEXT;
 		jimport('joomla.utilities.date');
 		$jNow = new JDate();
 
+		if (version_compare(JVERSION, '3.0', 'ge')) {
+			$now = $jNow->toSql();
+		} else {
+			$now = $jNow->toMysql();
+		}
+
 		$state  = (int) $this->getState('articlesstate', 1);
 
 		$data = array(
@@ -398,7 +404,7 @@ ENDTEXT;
 			'sectionid'		=> 0,
 			'mask'			=> 0,
 			'catid'			=> $cat_id,
-			'created'		=> $jNow->toMySQL(),
+			'created'		=> $now,
 			'created_by_alias' => 'Overload',
 			'attribs'		=> array(
 				"show_title"=>"","link_titles"=>"","show_intro"=>"","show_category"=>"","link_category"=>"","show_parent_category"=>"","link_parent_category"=>"","show_author"=>"","link_author"=>"","show_create_date"=>"","show_modify_date"=>"","show_publish_date"=>"","show_item_navigation"=>"","show_icons"=>"","show_print_icon"=>"","show_email_icon"=>"","show_vote"=>"","show_hits"=>"","show_noauth"=>"","alternative_readmore"=>"","article_layout"=>""
