@@ -2,9 +2,7 @@
 
 defined('_JEXEC') or die();
 
-jimport('joomla.application.component.model');
-
-class OverloadModelProcess extends JModel
+class OverloadModelProcess extends FOFModel
 {
 	/** @var int Stores the timestamp when the real processing started */
 	private $_timerStart = null;

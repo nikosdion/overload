@@ -8,8 +8,16 @@
 
 defined('_JEXEC') or die();
 
-jimport('joomla.application.component.controller');
-
-class OverloadControllerStart extends JController
+class OverloadControllerStart extends FOFController
 {
+	public function execute($task) {
+		if(!in_array($task, array('cancel','save','apply'))) $task = 'edit';
+		parent::execute($task);
+	}
+
+	public function edit()
+	{
+		parent::edit();
+		JRequest::setVar('hidemainmenu', false);
+	}
 }

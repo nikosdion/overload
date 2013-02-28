@@ -25,19 +25,12 @@
 
 defined('_JEXEC') or die();
 
-$c = JRequest::getCmd('view','start');
-JRequest::setVar('view', $c);
-$path = JPATH_COMPONENT_ADMINISTRATOR.DS.'controllers'.DS.$c.'.php';
-if(JFile::exists($path)) {
-	require_once($path);
-} else {
-	JError::raiseError('500','Unknown controller '.$c);
+// Load FOF
+include_once JPATH_COMPONENT_ADMINISTRATOR.'/fof/include.php';
+if(!defined('FOF_INCLUDED')) {
+	JFactory::getApplication()->enqueueMessage('Your Overload installation is broken; please re-install. Alternatively, extract the installation archive and copy the fof directory inside your site\'s libraries directory.', 'error');
+	return false;
 }
 
-jimport('joomla.utilities.string');
-$controller_class = 'OverloadController'.ucfirst($c);
-$controller = new $controller_class();
-
-$controller->execute(JRequest::getCmd('task','display'));
-
-$controller->redirect();
+// Dispatch
+FOFDispatcher::getTmpInstance('com_overload')->dispatch();
