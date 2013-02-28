@@ -243,7 +243,7 @@ class OverloadModelProcess extends FOFModel
 			// Remove articles from category
 			$db = $this->getDbo();
 
-			$query = 'DELETE FROM #__assets WHERE `id` IN (SELECT `asset_id` FROM `#__content` WHERE `cat_id` = '.$db->q($id).')';
+			$query = 'DELETE FROM #__assets WHERE `id` IN (SELECT `asset_id` FROM `#__content` WHERE `catid` = '.$db->q($id).')';
 			$db->setQuery($query);
 			$db->query(); // Whoosh!
 
