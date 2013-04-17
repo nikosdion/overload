@@ -26,7 +26,11 @@
 defined('_JEXEC') or die();
 
 // Load FOF
-include_once JPATH_COMPONENT_ADMINISTRATOR.'/fof/include.php';
+if (file_exists(JPATH_LIBRARIES.'/fof/include.php')) {
+	include_once JPATH_LIBRARIES.'/fof/include.php';
+} else {
+	include_once JPATH_COMPONENT_ADMINISTRATOR.'/fof/include.php';
+}
 if(!defined('FOF_INCLUDED')) {
 	JFactory::getApplication()->enqueueMessage('Your Overload installation is broken; please re-install. Alternatively, extract the installation archive and copy the fof directory inside your site\'s libraries directory.', 'error');
 	return false;
