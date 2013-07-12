@@ -10,7 +10,7 @@ defined('_JEXEC') or die();
 
 jimport('joomla.application.component.view');
 
-class OverloadViewStart extends FOFViewHtml
+class OverloadViewCpanels extends FOFViewHtml
 {
 	public function display($tpl = null) {
 		JToolBarHelper::title(JText::_('COM_OVERLOAD_TITLE'));
