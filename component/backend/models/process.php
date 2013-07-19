@@ -418,6 +418,8 @@ ENDTEXT;
 			'hits'			=> 0,
 			'featured'		=> 0,
 			'language'		=> '*',
+			'associations'	=> array(),
+			'metadata'		=> '{"tags":[]}',
 			'state'			=> $state
 		);
 		
