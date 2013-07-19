@@ -288,6 +288,8 @@ class OverloadModelProcess extends FOFModel
 			'metadata'		=> array('page_title' => '', 'author' => '', 'robots' => ''),
 			'hits'			=> 0,
 			'language'		=> '*',
+			'associations'	=> array(),
+			'metadata'		=> '{"tags":[]}',
 			'published'		=> 1
 		);
 
