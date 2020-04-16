@@ -1,0 +1,15 @@
+{
+	"name": "nikosdion/overload",
+	"description": "Mass Joomla! sample content creator",
+	"minimum-stability": "stable",
+	"license": "GPL-3.0-or-later",
+	"authors": [
+		{
+			"name": "Nicholas K. Dionysopoulos",
+			"email": "nicholas*NOSPAM*@akeebabackup.com"
+		}
+	],
+	"require": {
+		"fzaninotto/faker": "^1.9"
+	}
+}
