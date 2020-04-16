@@ -1,0 +1,50 @@
+Usage: /path/to/php /another/path/to/overload.php [OPTIONS]
+
+This script must be run from the cli folder of your site. Example:
+    cd /var/www/joomlasite/cli
+    php /home/user/overload/overload.php --site-url="http://localhost/example"
+
+The following options are recognized and are all optional:
+
+--help
+    Show this help text
+
+--site-url="https://www.example.com"
+    URL to the site. Currently unused.
+
+--root-catid=0
+    Numeric ID of the category under which categories and articles will be
+    created. Empty or 0 for com_content root.
+
+--categories-levels=4
+    How deeply should categories be nested.
+
+--categories-count=3
+    Number of categories to create per level. Set to 0 to only creates articles
+    in the root_category.
+
+--categories-nozap
+    By default, Overload! will delete existing categories. Setting this option
+    will add categories, without removing existing ones.
+
+    Note that the root category and its immediate articles are NEVER deleted.
+
+--categories-randomize
+    If specified a random number of categories, between 1 and categories-count,
+    will be created on each category level.
+
+--articles-count=10
+    How many articles will be created per category level.
+
+--articles-nozap
+    By default, Overload! will delete existing articles. Setting this option
+    will add articles to categories without deleting existing ones.
+
+    Note that the root category and its immediate articles are NEVER deleted.
+
+    WARNING! You cannot use --articles-nozap without --categories-nozap.
+    Removing a category requires removing its articles first.
+
+--articles-randomize
+    If specified a random number or articles, between 1 and articles-count,
+    will be created on each category level.

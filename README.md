@@ -32,7 +32,7 @@ The full text of the license can be found in the LICENSE.txt file.
 
 ## Documentation
 
-I have documented this tool in [the GitHub repository's wiki page](https://github.com/nikosdion/overload/wiki).
+Consult the help.txt file.
 
 ## Support and collaboration
 

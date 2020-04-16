@@ -1,0 +1,8 @@
+<component name="CopyrightManager">
+  <copyright>
+    <option name="allowReplaceRegexp" value="Copyright\s*\(c\)\s*2011-20[\d][\d]\s* Nicholas\sK\.\sDionysopoulos" />
+    <option name="keyword" value="Copyright\s*\(c\)\s*2011-20[\d][\d]\s* Nicholas\sK\.\sDionysopoulos" />
+    <option name="notice" value="@package   overload&#10;@copyright (c) 2011-&amp;#36;today.year Nicholas K. Dionysopoulos&#10;@license   GNU General Public License version 3 or later" />
+    <option name="myName" value="Default" />
+  </copyright>
+</component>
