@@ -99,7 +99,41 @@ class OverloadCLI extends OverloadApplicationCLI
 		Table::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_categories/tables');
 		Table::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_content/tables');
 
-		// TODO
+		if (empty($rootCategory))
+		{
+			if ($catCount == 0)
+			{
+				$this->out('You need to use --root-catid when setting --categories-count=0');
+
+				$this->close(1);
+			}
+
+			// TODO Get the root of com_content categories
+		}
+		else
+		{
+			// TODO Verify the $rootCategory or fail early
+		}
+
+		if ($catDelete && ($catCount > 0))
+		{
+			// TODO Find existing categories under the root
+			// TODO For each category: delete its articles and delete the category itself
+		}
+
+		if ($catCount > 0)
+		{
+			// TODO Create categories, $catLevels levels deep. Store IDs in $catIDs.
+		}
+		else
+		{
+			$catIDs = [$rootCategory];
+		}
+
+		// TODO Foreach $catIDs
+			// TODO Find out which users can create articles in this category
+			// TODO Delete articles unless $articlesDelete is false
+			// TODO Create articles
 	}
 
 	/**
@@ -246,6 +280,8 @@ class OverloadCLI extends OverloadApplicationCLI
 	{
 		$title = $this->faker->sentence(8);
 		$alias = ApplicationHelper::stringURLSafe($title);
+
+		// TODO Set up the created_by based on the users who can create articles in this category
 
 		$data = [
 			'id'               => 0,
