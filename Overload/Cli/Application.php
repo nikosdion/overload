@@ -1,8 +1,8 @@
 <?php
 /**
- * @package   overload
+ * @package       overload
  * @copyright (c) 2011-2020 Nicholas K. Dionysopoulos
- * @license   GNU General Public License version 3 or later
+ * @license       GNU General Public License version 3 or later
  */
 
 // Do not put the JEXEC or die check on this file
@@ -149,6 +149,8 @@ switch ($joomlaMajorVersion)
  * error level to 254.
  *
  * @param   Throwable  $ex  The Exception / Error being handled
+ *
+ * @since   2.0.0
  */
 function OverloadCliExceptionHandler($ex)
 {
@@ -171,6 +173,7 @@ function OverloadCliExceptionHandler($ex)
  * error message instead of just dying cold. The error level is set to 253 in this case.
  *
  * @return  void
+ * @since   2.0.0
  */
 function OverloadCliTimeoutHandler()
 {
@@ -246,6 +249,7 @@ END;
  * @param   int     $errline  Line number where the error occurred
  *
  * @return  void
+ * @since   2.0.0
  */
 function OverloadCliErrorHandler($errno, $errstr, $errfile, $errline)
 {

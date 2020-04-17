@@ -1,8 +1,8 @@
 <?php
 /**
- * @package   overload
+ * @package       overload
  * @copyright (c) 2011-2020 Nicholas K. Dionysopoulos
- * @license   GNU General Public License version 3 or later
+ * @license       GNU General Public License version 3 or later
  */
 
 // Do not put the JEXEC or die check on this file
@@ -42,6 +42,8 @@ if (version_compare("$joomlaMajorVersion.$joomlaMinorVersion", '3.8', 'lt'))
 
 /**
  * Base class for a Joomla! command line application. Adapted from JCli / JApplicationCli
+ *
+ * @since   2.0.0
  */
 abstract class OverloadCliApplicationJoomla3 extends CliApplication
 {
@@ -49,6 +51,7 @@ abstract class OverloadCliApplicationJoomla3 extends CliApplication
 
 	private $allowedToClose = false;
 
+	/** @inheritDoc */
 	public static function getInstance($name = null)
 	{
 		// Create a CLI-specific session
@@ -63,6 +66,7 @@ abstract class OverloadCliApplicationJoomla3 extends CliApplication
 		return $instance;
 	}
 
+	/** @inheritDoc */
 	public function __construct(Cli $input = null, \Joomla\Registry\Registry $config = null, \JEventDispatcher $dispatcher = null)
 	{
 		// Some servers only provide a CGI executable. While not ideal for running CLI applications we can make do.
@@ -94,8 +98,7 @@ abstract class OverloadCliApplicationJoomla3 extends CliApplication
 	 *
 	 * @return  void
 	 *
-	 * @codeCoverageIgnore
-	 * @since   1.0
+	 * @since   2.0.0
 	 */
 	public function close($code = 0)
 	{
@@ -113,7 +116,7 @@ abstract class OverloadCliApplicationJoomla3 extends CliApplication
 	 *
 	 * @return  string  The name of the application.
 	 *
-	 * @since   4.0.0
+	 * @since   2.0.0
 	 */
 	public function getName()
 	{
@@ -128,7 +131,7 @@ abstract class OverloadCliApplicationJoomla3 extends CliApplication
 	 *
 	 * @return  \Joomla\CMS\Menu\AbstractMenu|null  A AbstractMenu object or null if not set.
 	 *
-	 * @since   4.0.0
+	 * @since   2.0.0
 	 */
 	public function getMenu($name = null, $options = [])
 	{

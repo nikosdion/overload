@@ -14,6 +14,7 @@ namespace Overload\Cli\Traits;
  * human-readable strings.
  *
  * @package Overload\Cli\Traits
+ * @since   2.0.0
  */
 trait MemStatsAware
 {
@@ -23,6 +24,7 @@ trait MemStatsAware
 	 * @param   int  $size  The size in bytes to format, e.g. 8254862
 	 *
 	 * @return  string  The human-readable representation of the byte size, e.g. "7.87 Mb"
+	 * @since   2.0.0
 	 */
 	protected function formatByteSize($size)
 	{
@@ -35,6 +37,7 @@ trait MemStatsAware
 	 * Returns the current memory usage, formatted
 	 *
 	 * @return  string
+	 * @since   2.0.0
 	 */
 	protected function memUsage()
 	{
@@ -54,6 +57,7 @@ trait MemStatsAware
 	 * Returns the peak memory usage, formatted
 	 *
 	 * @return  string
+	 * @since   2.0.0
 	 */
 	protected function peakMemUsage()
 	{

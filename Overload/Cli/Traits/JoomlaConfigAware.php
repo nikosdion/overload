@@ -1,8 +1,8 @@
 <?php
 /**
- * @package   overload
+ * @package       overload
  * @copyright (c) 2011-2020 Nicholas K. Dionysopoulos
- * @license   GNU General Public License version 3 or later
+ * @license       GNU General Public License version 3 or later
  */
 
 namespace Overload\Cli\Traits;
@@ -11,6 +11,7 @@ namespace Overload\Cli\Traits;
  * Allows the CLI application to use the Joomla Global Configuration parameters as its own configuration.
  *
  * @package Overload\Cli\Traits
+ * @since   2.0.0
  */
 trait JoomlaConfigAware
 {
@@ -24,6 +25,7 @@ trait JoomlaConfigAware
 	 * @param   string       $className  The name of the PHP class holding the configuration. Default: JConfig
 	 *
 	 * @return  mixed  Either an array or object to be loaded into the configuration object.
+	 * @since   2.0.0
 	 */
 	protected function fetchConfigurationData($file = null, $className = 'JConfig')
 	{

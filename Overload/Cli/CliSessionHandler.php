@@ -1,8 +1,8 @@
 <?php
 /**
- * @package   overload
+ * @package       overload
  * @copyright (c) 2011-2020 Nicholas K. Dionysopoulos
- * @license   GNU General Public License version 3 or later
+ * @license       GNU General Public License version 3 or later
  */
 
 namespace Overload\Cli;
@@ -27,7 +27,7 @@ class CliSessionHandler implements JSessionHandlerInterface
 	 * @return  boolean  True if started.
 	 *
 	 * @throws  RuntimeException If something goes wrong starting the session.
-	 * @since   3.4.8
+	 * @since   2.0.0
 	 */
 	public function start()
 	{
@@ -39,7 +39,7 @@ class CliSessionHandler implements JSessionHandlerInterface
 	 *
 	 * @return  boolean  True if started, false otherwise.
 	 *
-	 * @since   3.4.8
+	 * @since   2.0.0
 	 */
 	public function isStarted()
 	{
@@ -51,7 +51,7 @@ class CliSessionHandler implements JSessionHandlerInterface
 	 *
 	 * @return  string  The session ID
 	 *
-	 * @since   3.4.8
+	 * @since   2.0.0
 	 */
 	public function getId()
 	{
@@ -65,7 +65,7 @@ class CliSessionHandler implements JSessionHandlerInterface
 	 *
 	 * @return  void
 	 *
-	 * @since   3.4.8
+	 * @since   2.0.0
 	 */
 	public function setId($id)
 	{
@@ -77,7 +77,7 @@ class CliSessionHandler implements JSessionHandlerInterface
 	 *
 	 * @return  mixed  The session name.
 	 *
-	 * @since   3.4.8
+	 * @since   2.0.0
 	 */
 	public function getName()
 	{
@@ -91,7 +91,7 @@ class CliSessionHandler implements JSessionHandlerInterface
 	 *
 	 * @return  void
 	 *
-	 * @since   3.4.8
+	 * @since   2.0.0
 	 */
 	public function setName($name)
 	{
@@ -112,7 +112,7 @@ class CliSessionHandler implements JSessionHandlerInterface
 	 *
 	 * @return  boolean  True if session regenerated, false if error
 	 *
-	 * @since   3.4.8
+	 * @since   2.0.0
 	 */
 	public function regenerate($destroy = false, $lifetime = null)
 	{
@@ -131,7 +131,7 @@ class CliSessionHandler implements JSessionHandlerInterface
 	 * @return  void
 	 *
 	 * @throws  RuntimeException  If the session is saved without being started, or if the session is already closed.
-	 * @since   3.4.8
+	 * @since   2.0.0
 	 * @see     session_write_close()
 	 */
 	public function save()
@@ -144,7 +144,7 @@ class CliSessionHandler implements JSessionHandlerInterface
 	 *
 	 * @return  void
 	 *
-	 * @since   3.4.8
+	 * @since   2.0.0
 	 */
 	public function clear()
 	{

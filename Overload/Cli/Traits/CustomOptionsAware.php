@@ -1,8 +1,8 @@
 <?php
 /**
- * @package   overload
+ * @package       overload
  * @copyright (c) 2011-2020 Nicholas K. Dionysopoulos
- * @license   GNU General Public License version 3 or later
+ * @license       GNU General Public License version 3 or later
  */
 
 namespace Overload\Cli\Traits;
@@ -16,6 +16,7 @@ use Joomla\CMS\Filter\InputFilter;
  * instead.
  *
  * @package Overload\Cli\Traits
+ * @since   2.0.0
  */
 trait CustomOptionsAware
 {
@@ -23,6 +24,7 @@ trait CustomOptionsAware
 	 * POSIX-style CLI options. Access them with through the getOption method.
 	 *
 	 * @var   array
+	 * @since   2.0.0
 	 */
 	protected static $cliOptions = [];
 
@@ -30,13 +32,15 @@ trait CustomOptionsAware
 	 * Filter object to use for custom options parsing.
 	 *
 	 * @var    JFilterInput|InputFilter
+	 * @since   2.0.0
 	 */
 	protected $filter = null;
 
 	/**
 	 * Initializes the custom CLI options parsing
 	 *
-	 * @return void
+	 * @return  void
+	 * @since   2.0.0
 	 */
 	protected function initialiseCustomOptions()
 	{
@@ -61,6 +65,7 @@ trait CustomOptionsAware
 	 * This works much better than JInputCli since it allows you to use all valid POSIX ways of defining CLI parameters.
 	 *
 	 * @return  void
+	 * @since   2.0.0
 	 */
 	protected function parseOptions()
 	{
@@ -107,7 +112,7 @@ trait CustomOptionsAware
 
 				if (strstr($argument, '='))
 				{
-					list($name, $value) = explode('=', $argument, 2);
+					[$name, $value] = explode('=', $argument, 2);
 				}
 
 				$currentName = $name;
@@ -160,6 +165,7 @@ trait CustomOptionsAware
 	 * @param   string  $type     Joomla! filter type, e.g. cmd, int, bool and so on.
 	 *
 	 * @return  mixed  The value of the option
+	 * @since   2.0.0
 	 */
 	protected function getOption($key, $default = null, $type = 'raw')
 	{
@@ -193,6 +199,7 @@ trait CustomOptionsAware
 	 * @param   string  $type  The filter type, default 'cmd'
 	 *
 	 * @return  mixed  The filtered value
+	 * @since   2.0.0
 	 */
 	protected function filterVariable($var, $type = 'cmd')
 	{

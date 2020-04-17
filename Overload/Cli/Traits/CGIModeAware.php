@@ -1,8 +1,8 @@
 <?php
 /**
- * @package   overload
+ * @package       overload
  * @copyright (c) 2011-2020 Nicholas K. Dionysopoulos
- * @license   GNU General Public License version 3 or later
+ * @license       GNU General Public License version 3 or later
  */
 
 namespace Overload\Cli\Traits;
@@ -16,12 +16,15 @@ namespace Overload\Cli\Traits;
  * execution time limit, if possible, to prevent accidental timeouts.
  *
  * @package Overload\Cli\Traits
+ * @since   2.0.0
  */
 trait CGIModeAware
 {
 	/**
 	 * Detect if we are running under CGI mode. In this case it populates the global $argv and $argc parameters off the
 	 * CGI input ($_GET superglobal).
+	 *
+	 * @since   2.0.0
 	 */
 	private function detectAndWorkAroundCGIMode()
 	{

@@ -23,6 +23,7 @@ trait TimeAgoAware
 	 * @param   bool      $autoSuffix          Add "ago" / "from now" suffix?
 	 *
 	 * @return  string  For example, "10 seconds ago"
+	 * @since   2.0.0
 	 */
 	protected function timeAgo($referenceTimestamp = 0, $currentTimestamp = null, $timeUnit = '', $autoSuffix = true)
 	{
