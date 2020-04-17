@@ -13,6 +13,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Menu\AbstractMenu;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Router\Router;
+use Joomla\CMS\Table\Content as ContentTable;
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\Uri\Uri;
 
@@ -25,11 +26,12 @@ if (!is_object($autoloader))
 	die('Please run composer install in the Overload working directory before running this script.');
 }
 
-$autoloader->addPsr4('\\Overload\\', __DIR__ . '/Overload');
+$autoloader->addPsr4('Overload\\', __DIR__ . '/Overload');
 // endregion
 
 // region Boilerplate
 define('_JEXEC', 1);
+define('JDEBUG', 0);
 
 foreach ([__DIR__, getcwd()] as $curdir)
 {
@@ -118,6 +120,11 @@ class OverloadCLI extends OverloadApplicationCLI
 		BaseDatabaseModel::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_content/models');
 		Table::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_categories/tables');
 		Table::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_content/tables');
+
+		// Pretend that a Super User is logged in
+		$suIDs     = $this->getSuperUsers();
+		$superUser = \Joomla\CMS\User\User::getInstance($suIDs[0]);
+		Factory::getSession()->set('user', $superUser);
 
 		if (empty($rootCategory))
 		{
@@ -260,6 +267,16 @@ class OverloadCLI extends OverloadApplicationCLI
 	public function getMenu($name = null, $options = []): ?AbstractMenu
 	{
 		return AbstractMenu::getInstance($name, $options);
+	}
+
+	public function isClient(?string $client = 'site')
+	{
+		return $client === 'administrator';
+	}
+
+	public function getClientId(): int
+	{
+		return 1;
 	}
 
 	/**
@@ -582,10 +599,17 @@ class OverloadCLI extends OverloadApplicationCLI
 		$this->deleteArticlesInCategory($catID);
 
 		// Delete the category itself.
+		/** @var CategoriesTableCategory $table */
+		$table = Table::getInstance('Category', 'CategoriesTable');
+
 		/** @var CategoriesModelCategory $model */
 		$model = BaseDatabaseModel::getInstance('Category', 'CategoriesModel');
+		$pks   = [$catID];
 
-		if (!$model->delete($catID))
+		// Joomla requires me to trash before deleting
+		$table->publish($pks, -2);
+
+		if (!$model->delete($pks))
 		{
 			throw new RuntimeException($model->getError());
 		}
@@ -615,6 +639,11 @@ class OverloadCLI extends OverloadApplicationCLI
 
 		/** @var ContentModelArticle $model */
 		$model = BaseDatabaseModel::getInstance('Article', 'ContentModel');
+		/** @var ContentTable $table */
+		$table = ContentTable::getInstance('Content');
+
+		// We must trash the articles before deleting them because that's the One True Joomla! Way
+		$table->publish($articleIDs, -2);
 
 		if (!$model->delete($articleIDs))
 		{
@@ -665,6 +694,29 @@ class OverloadCLI extends OverloadApplicationCLI
 	}
 
 	/**
+	 * Returns the user IDs of Super Users
+	 *
+	 * @return  array
+	 *
+	 * @since   2.0.0
+	 */
+	private function getSuperUsers(): array
+	{
+		$authorGroups = array_filter($this->getAllUserGroups(), function ($gid) {
+			return Access::checkGroup($gid, 'core.admin');
+		});
+
+		$users = [];
+
+		foreach ($authorGroups as $gid)
+		{
+			$users = array_merge($users, Access::getUsersByGroup($gid));
+		}
+
+		return $users;
+	}
+
+	/**
 	 * Returns all the users who have core.create privileges for the given category.
 	 *
 	 * @param   int  $catId
@@ -692,7 +744,6 @@ class OverloadCLI extends OverloadApplicationCLI
 
 		return $users;
 	}
-
 }
 
 OverloadApplicationCLI::getInstance('OverloadCLI')->execute();
