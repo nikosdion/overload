@@ -6,6 +6,7 @@
  */
 
 use Faker\Provider\Biased;
+use Joomla\CMS\Access\Access;
 use Joomla\CMS\Application\ApplicationHelper;
 use Joomla\CMS\Date\Date;
 use Joomla\CMS\Factory;
@@ -64,6 +65,22 @@ class OverloadCLI extends OverloadApplicationCLI
 	 * @since 2.0.0
 	 */
 	private $faker;
+
+	/**
+	 * User IDs that can create categories.
+	 *
+	 * @var   array
+	 * @since 2.0.0
+	 */
+	private $categoryCreators;
+
+	/**
+	 * User IDs that can create articles
+	 *
+	 * @var   array
+	 * @since 2.0.0
+	 */
+	private $articleCreators;
 
 	/**
 	 * The main entry point of the application
@@ -144,8 +161,9 @@ class OverloadCLI extends OverloadApplicationCLI
 		if ($catCount > 0)
 		{
 			$this->out('Creating categories');
-			$catIDs           = [];
-			$previousLevelIDs = [$rootCategory];
+			$catIDs                 = [];
+			$previousLevelIDs       = [$rootCategory];
+			$this->categoryCreators = $this->getGroupCreators();
 
 			for ($i = 0; $i < $catLevels; $i++)
 			{
@@ -179,7 +197,8 @@ class OverloadCLI extends OverloadApplicationCLI
 
 		foreach ($catIDs as $catId)
 		{
-			// TODO Find out which users can create articles in this category
+			// Find out which users can create articles in this category
+			$this->articleCreators = $this->getCategoryAuthors($catId);
 
 			// Delete articles unless $articlesDelete is false
 			if ($articlesDelete)
@@ -304,26 +323,27 @@ class OverloadCLI extends OverloadApplicationCLI
 	{
 		$title = $this->faker->sentence(8);
 		$alias = ApplicationHelper::stringURLSafe($title);
+		$uid   = $this->faker->randomElement($this->categoryCreators);
 
 		/** @var CategoriesModelCategory $model */
 		$model  = BaseDatabaseModel::getInstance('Category', 'CategoriesModel');
 		$parent = $model->getItem($parent_id);
 
 		$data = [
-			'parent_id'    => $parent_id,
-			'level'        => $parent->level + 1,
-			'extension'    => 'com_content',
-			'title'        => $title,
-			'alias'        => $alias,
-			'description'  => $this->getRandomParagraphs(3, true),
-			'access'       => 1,
-			'params'       => ['target' => '', 'image' => ''],
-			'metadata'     => ['page_title' => '', 'author' => '', 'robots' => '', 'tags' => ''],
-			'hits'         => 0,
-			'language'     => '*',
-			'associations' => [],
-			'published'    => 1,
-			// TODO Maybe randomize the author here?
+			'parent_id'       => $parent_id,
+			'level'           => $parent->level + 1,
+			'extension'       => 'com_content',
+			'title'           => $title,
+			'alias'           => $alias,
+			'description'     => $this->getRandomParagraphs(3, true),
+			'access'          => 1,
+			'params'          => ['target' => '', 'image' => ''],
+			'metadata'        => ['page_title' => '', 'author' => '', 'robots' => '', 'tags' => ''],
+			'hits'            => 0,
+			'language'        => '*',
+			'associations'    => [],
+			'published'       => 1,
+			'created_user_id' => $uid,
 		];
 
 		// Save the category
@@ -380,8 +400,6 @@ class OverloadCLI extends OverloadApplicationCLI
 		$title = $this->faker->sentence(8);
 		$alias = ApplicationHelper::stringURLSafe($title);
 
-		// TODO Set up the created_by based on the users who can create articles in this category
-
 		$data = [
 			'id'               => 0,
 			'title'            => $title,
@@ -392,6 +410,7 @@ class OverloadCLI extends OverloadApplicationCLI
 			'sectionid'        => 0,
 			'mask'             => 0,
 			'catid'            => $cat_id,
+			'created_by'       => $this->faker->randomElement($this->articleCreators),
 			'created'          => (new Date($this->faker->dateTimeBetween('-5 years', 'now')->getTimestamp()))->toSql(),
 			'created_by_alias' => $this->faker->name,
 			'attribs'          => [
@@ -602,6 +621,78 @@ class OverloadCLI extends OverloadApplicationCLI
 			throw new RuntimeException($model->getError());
 		}
 	}
+
+	/**
+	 * Return all user group IDs known to Joomla
+	 *
+	 * @return  array
+	 *
+	 * @since   2.0.0
+	 */
+	private function getAllUserGroups(): array
+	{
+		$db    = Factory::getDbo();
+		$query = $db->getQuery(true)
+			->select($db->qn('id'))
+			->from($db->qn('#__usergroups'));
+
+		return $db->setQuery($query)->loadColumn() ?? [];
+	}
+
+	/**
+	 * Returns the user IDs which can create groups
+	 *
+	 * @return  array
+	 *
+	 * @since   2.0.0
+	 */
+	private function getGroupCreators(): array
+	{
+		$authorGroups = array_filter($this->getAllUserGroups(), function ($gid) {
+			return Access::checkGroup($gid, 'core.create') ||
+				Access::checkGroup($gid, 'core.admin') ||
+				Access::checkGroup($gid, 'core.create', 'com_categories');
+		});
+
+		$users = [];
+
+		foreach ($authorGroups as $gid)
+		{
+			$users = array_merge($users, Access::getUsersByGroup($gid));
+		}
+
+		return $users;
+	}
+
+	/**
+	 * Returns all the users who have core.create privileges for the given category.
+	 *
+	 * @param   int  $catId
+	 *
+	 * @return  array
+	 *
+	 * @since   2.0.0
+	 */
+	private function getCategoryAuthors(int $catId): array
+	{
+		Access::preload('com_content.category.' . $catId);
+
+		$authorGroups = array_filter($this->getAllUserGroups(), function ($gid) use ($catId) {
+			return Access::checkGroup($gid, 'core.create') ||
+				Access::checkGroup($gid, 'core.admin') ||
+				Access::checkGroup($gid, 'core.create', 'com_content.category.' . $catId);
+		});
+
+		$users = [];
+
+		foreach ($authorGroups as $gid)
+		{
+			$users = array_merge($users, Access::getUsersByGroup($gid));
+		}
+
+		return $users;
+	}
+
 }
 
 OverloadApplicationCLI::getInstance('OverloadCLI')->execute();
