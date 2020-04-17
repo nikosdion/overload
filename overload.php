@@ -5,6 +5,7 @@
  * @license       GNU General Public License version 3 or later
  */
 
+use Faker\Provider\Biased;
 use Joomla\CMS\Application\ApplicationHelper;
 use Joomla\CMS\Date\Date;
 use Joomla\CMS\Factory;
@@ -59,14 +60,16 @@ class OverloadCLI extends OverloadApplicationCLI
 	/**
 	 * Faker's generator
 	 *
-	 * @var \Faker\Generator
+	 * @var   \Faker\Generator
+	 * @since 2.0.0
 	 */
 	private $faker;
 
 	/**
 	 * The main entry point of the application
 	 *
-	 * @return void
+	 * @return  void
+	 * @since   2.0.0
 	 */
 	public function doExecute(): void
 	{
@@ -108,32 +111,100 @@ class OverloadCLI extends OverloadApplicationCLI
 				$this->close(1);
 			}
 
-			// TODO Get the root of com_content categories
+			// Get the categories root
+			$rootCategory = $this->getCategoriesRoot();
 		}
 		else
 		{
-			// TODO Verify the $rootCategory or fail early
+			// Verify the $rootCategory or fail early
+			$this->verifyCategory($rootCategory);
 		}
+
+		$this->out(sprintf("Articles and categories creation using category node %d as root.", $rootCategory));
 
 		if ($catDelete && ($catCount > 0))
 		{
-			// TODO Find existing categories under the root
-			// TODO For each category: delete its articles and delete the category itself
+			$this->out("Deleting existing categories");
+
+			// Find existing categories under the root
+			$catIDs = $this->getAllChildrenCategoryIDs($rootCategory);
+			$this->out(sprintf("  Found %d categories to delete", count($catIDs)));
+
+			// For each category: delete its articles and delete the category itself
+			foreach ($catIDs as $catId)
+			{
+				$this->out(sprintf("  Deleting category %d", $catId));
+				$this->deleteCategory($catId);
+			}
 		}
 
+		$catIDs = [$rootCategory];
+
+		// Create categories, $catLevels levels deep. Store IDs in $catIDs.
 		if ($catCount > 0)
 		{
-			// TODO Create categories, $catLevels levels deep. Store IDs in $catIDs.
-		}
-		else
-		{
-			$catIDs = [$rootCategory];
+			$this->out('Creating categories');
+			$catIDs           = [];
+			$previousLevelIDs = [$rootCategory];
+
+			for ($i = 0; $i < $catLevels; $i++)
+			{
+				$this->out(sprintf('  Creating categories %d level(s) from the root', $i + 1));
+				$thisLevelIDs   = [];
+				$createCatCount = $catCount;
+
+				foreach ($previousLevelIDs as $parentId)
+				{
+					if ($catRandomize)
+					{
+						$createCatCount = $this->faker->biasedNumberBetween(1, $catCount, [
+							Biased::class, 'linearHigh',
+						]);
+					}
+
+					$this->out(sprintf('    %d categories under root ID %d', $createCatCount, $parentId));
+
+					for ($j = 0; $j < $createCatCount; $j++)
+					{
+						$thisLevelIDs[] = $this->createCategory($parentId);
+					}
+				}
+
+				$catIDs           = array_merge($catIDs, $thisLevelIDs);
+				$previousLevelIDs = $thisLevelIDs;
+			}
 		}
 
-		// TODO Foreach $catIDs
+		$this->out(sprintf('We have a total of %d categories to create articles in.', count($catIDs)));
+
+		foreach ($catIDs as $catId)
+		{
 			// TODO Find out which users can create articles in this category
-			// TODO Delete articles unless $articlesDelete is false
-			// TODO Create articles
+
+			// Delete articles unless $articlesDelete is false
+			if ($articlesDelete)
+			{
+				$this->out(sprintf('  Deleting old articles from category %d', $catId));
+				$this->deleteArticlesInCategory($catId);
+			}
+
+			// Create articles
+			$createArticleCount = $articlesCount;
+
+			if ($articlesRandomize)
+			{
+				$createArticleCount = $this->faker->biasedNumberBetween(1, $articlesCount, [
+					Biased::class, 'linearHigh',
+				]);
+			}
+
+			$this->out(sprintf('  Creating %d articles for category %d', $createArticleCount, $catId));
+
+			for ($j = 0; $j < $createArticleCount; $j++)
+			{
+				$this->createArticle($catId);
+			}
+		}
 	}
 
 	/**
@@ -143,6 +214,7 @@ class OverloadCLI extends OverloadApplicationCLI
 	 * @param   array        $options  An optional associative array of configuration settings.
 	 *
 	 * @return  Router|null  A JRouter object
+	 * @since   2.0.0
 	 */
 	public function getRouter($name = null, array $options = []): ?Router
 	{
@@ -162,8 +234,9 @@ class OverloadCLI extends OverloadApplicationCLI
 	 * @param   string|null  $name
 	 * @param   array        $options
 	 *
-	 * @return AbstractMenu|null
-	 * @throws Exception
+	 * @return  AbstractMenu|null
+	 * @throws  Exception
+	 * @since   2.0.0
 	 */
 	public function getMenu($name = null, $options = []): ?AbstractMenu
 	{
@@ -176,6 +249,7 @@ class OverloadCLI extends OverloadApplicationCLI
 	 * @param   string  $siteURL  The URL to the site
 	 *
 	 * @throws  ReflectionException
+	 * @since   2.0.0
 	 */
 	private function initCliRouting(string $siteURL = 'https://www.example.com')
 	{
@@ -204,6 +278,11 @@ class OverloadCLI extends OverloadApplicationCLI
 		$this->getRouter()->setMode($this->get('sef', 0));
 	}
 
+	/**
+	 * Show the help text
+	 *
+	 * @since   2.0.0
+	 */
 	private function showHelp(): void
 	{
 		echo file_get_contents(__DIR__ . '/help.txt');
@@ -211,16 +290,28 @@ class OverloadCLI extends OverloadApplicationCLI
 		$this->close();
 	}
 
-	private function createCategory(int $parent_id = 1, int $level = 1): ?int
+	/**
+	 * Create a category and return its ID or NULL if creation failed
+	 *
+	 * @param   int  $parent_id  Parent category ID
+	 *
+	 * @return  int|null  Created category ID or NULL if creation failed
+	 *
+	 * @throws  Exception
+	 * @since   2.0.0
+	 */
+	private function createCategory(int $parent_id = 1): ?int
 	{
 		$title = $this->faker->sentence(8);
 		$alias = ApplicationHelper::stringURLSafe($title);
 
-		// TODO I should get the level from the parent category and simply add 1 to it.
+		/** @var CategoriesModelCategory $model */
+		$model  = BaseDatabaseModel::getInstance('Category', 'CategoriesModel');
+		$parent = $model->getItem($parent_id);
 
 		$data = [
 			'parent_id'    => $parent_id,
-			'level'        => $level,
+			'level'        => $parent->level + 1,
 			'extension'    => 'com_content',
 			'title'        => $title,
 			'alias'        => $alias,
@@ -276,7 +367,15 @@ class OverloadCLI extends OverloadApplicationCLI
 		return $id;
 	}
 
-	private function createArticle($cat_id = 1)
+	/**
+	 * Creates an article in the specified category
+	 *
+	 * @param   int  $cat_id  The category to create the article in
+	 *
+	 * @return  void
+	 * @since   2.0.0
+	 */
+	private function createArticle($cat_id = 1): void
 	{
 		$title = $this->faker->sentence(8);
 		$alias = ApplicationHelper::stringURLSafe($title);
@@ -343,6 +442,7 @@ class OverloadCLI extends OverloadApplicationCLI
 	 * @param   bool  $randomCount  Should I randomize the number of paragraphs, max $howMany?
 	 *
 	 * @return  string  The HTML string of your random paragraphs
+	 * @since   2.0.0
 	 */
 	private function getRandomParagraphs(int $howMany, bool $randomCount = true): string
 	{
@@ -354,6 +454,153 @@ class OverloadCLI extends OverloadApplicationCLI
 		return implode(',', array_map(function ($p) {
 			return "<p>" . $p . "</p>";
 		}, $this->faker->paragraphs($howMany, false)));
+	}
+
+	/**
+	 * Get the ID of the root of all categories.
+	 *
+	 * @return  int
+	 *
+	 * @since   2.0.0
+	 */
+	private function getCategoriesRoot(): int
+	{
+		$db    = Factory::getDbo();
+		$query = $db->getQuery(true)
+			->select($db->qn('id'))
+			->from($db->qn('#__categories'))
+			->where($db->qn('parent_id') . ' = ' . $db->q(0))
+			->where($db->qn('level') . ' = ' . $db->q(0));
+
+		return $db->setQuery($query)->loadResult() ?? 0;
+	}
+
+	/**
+	 * Verify a category exists and belongs to com_content
+	 *
+	 * @param   int  $catID  The category ID to check
+	 *
+	 * @return  void
+	 * @since   2.0.0
+	 */
+	private function verifyCategory(int $catID): void
+	{
+		$db    = Factory::getDbo();
+		$query = $db->getQuery(true)
+			->select($db->qn('id'))
+			->from($db->qn('#__categories'))
+			->where($db->qn('extension') . ' = ' . $db->q('com_content'))
+			->where($db->qn('parent_id') . ' > ' . $db->q(0))
+			->where($db->qn('level') . ' > ' . $db->q(0))
+			->where($db->qn('id') . ' = ' . $db->q($catID));
+
+		if ($db->setQuery($query)->loadResult() != $catID)
+		{
+			throw new RuntimeException(sprintf('Category ID %d was not found or does not belong to Joomla articles (com_content).', $catID));
+		}
+	}
+
+	/**
+	 * Get all the content categories that are children (infinite levels deep) of the root category.
+	 *
+	 * @param   int  $catID  Root category ID
+	 *
+	 * @return  array  Children category IDs, ordered from leaf nodes down (leaves first, immediate root children last)
+	 *
+	 * @since   2.0.0
+	 */
+	private function getAllChildrenCategoryIDs(int $catID): array
+	{
+		$db = Factory::getDbo();
+
+		// First, I need the lft and rgt of my root category
+		$query    = $db->getQuery(true)
+			->select([
+				$db->qn('lft'),
+				$db->qn('rgt'),
+			])
+			->from($db->qn('#__categories'))
+			->where($db->qn('extension') . ' = ' . $db->q('com_content'))
+			->where($db->qn('id') . ' = ' . $db->q($catID));
+		$rootInfo = $db->setQuery($query)->loadAssoc();
+
+		if (empty($rootInfo))
+		{
+			throw new RuntimeException(sprintf("Could not retrieve information for category %d", $catID));
+		}
+
+		/**
+		 * Now, I can find the IDs of the subtree nodes.
+		 *
+		 * Make sure to filter for extension because the root node contains everything, not just com_content.
+		 *
+		 * Categories are returned in descending level order. This way the category nuking will go from the leaf nodes
+		 * towards the root nodes. It wouldn't work the other way around since we'd be trying to delete a non-empty
+		 * category.
+		 */
+		$query = $db->getQuery(true)
+			->select($db->qn('id'))
+			->from($db->qn('#__categories'))
+			->where($db->qn('extension') . ' = ' . $db->q('com_content'))
+			->where($db->qn('lft') . ' > ' . $db->q($rootInfo['lft']))
+			->where($db->qn('rgt') . ' < ' . $db->q($rootInfo['rgt']))
+			->order($db->qn('level') . ' DESC');
+
+		return $db->setQuery($query)->loadColumn() ?? [];
+	}
+
+	/**
+	 * Deletes a category and all of its articles
+	 *
+	 * @param   int  $catID  THe category to delete
+	 *
+	 * @return  void
+	 * @since   2.0.0
+	 */
+	private function deleteCategory(int $catID): void
+	{
+		// Delete all of the category articles.
+		$this->deleteArticlesInCategory($catID);
+
+		// Delete the category itself.
+		/** @var CategoriesModelCategory $model */
+		$model = BaseDatabaseModel::getInstance('Category', 'CategoriesModel');
+
+		if (!$model->delete($catID))
+		{
+			throw new RuntimeException($model->getError());
+		}
+	}
+
+	/**
+	 * Delete all articles in a category
+	 *
+	 * @param   int  $catID  The category ID the articles of which are going to be deleted
+	 *
+	 * @return  void
+	 * @since   2.0.0
+	 */
+	private function deleteArticlesInCategory(int $catID): void
+	{
+		$db         = Factory::getDbo();
+		$query      = $db->getQuery(true)
+			->select($db->qn('id'))
+			->from($db->qn('#__content'))
+			->where($db->qn('catid') . ' = ' . $db->q($catID));
+		$articleIDs = $db->setQuery($query)->loadColumn() ?? [];
+
+		if (empty($articleIDs))
+		{
+			return;
+		}
+
+		/** @var ContentModelArticle $model */
+		$model = BaseDatabaseModel::getInstance('Article', 'ContentModel');
+
+		if (!$model->delete($articleIDs))
+		{
+			throw new RuntimeException($model->getError());
+		}
 	}
 }
 
