@@ -1,6 +1,6 @@
 # Overload!
 
-Mass Joomla! sample content creator
+Mass Joomla! 3 and 4 sample content creator
 
 ## Executive summary
 
@@ -33,6 +33,12 @@ The full text of the license can be found in the LICENSE.txt file.
 ## Documentation
 
 Consult the help.txt file.
+
+## Requirements
+
+* Joomla! 3.9 or 4.0
+* At least PHP 7.1 (for Joomla 3.9) or 7.2 (Joomla 4.0). Tested with PHP 7.1, 7.2, 7.3 and 7.4.
+* PHP `memory_limit` at least 32MB
 
 ## Support and collaboration
 

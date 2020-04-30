@@ -11,6 +11,7 @@ use Joomla\CMS\Application\ApplicationHelper;
 use Joomla\CMS\Date\Date;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Menu\AbstractMenu;
+use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Router\Router;
 use Joomla\CMS\Table\Content as ContentTable;
@@ -86,6 +87,13 @@ class OverloadCLI extends OverloadApplicationCLI
 	 * @since 2.0.0
 	 */
 	private $articleCreators;
+
+	/**
+	 * com_content's container
+	 *
+	 * @var   \Joomla\DI\Container
+	 */
+	private $comContentContainer;
 
 	/**
 	 * The main entry point of the application
@@ -318,7 +326,7 @@ class OverloadCLI extends OverloadApplicationCLI
 		 *
 		 * Only applicable on Joomla 3. The site router in Joomla 4 sets itself up automatically.
 		 */
-		if (version_compare(JVERSION, '3.9.9999', 'le'))
+		if (version_compare(JVERSION, '3.999.999', 'le'))
 		{
 			$this->getRouter()->setMode($this->get('sef', 0));
 		}
@@ -353,8 +361,19 @@ class OverloadCLI extends OverloadApplicationCLI
 		$alias = ApplicationHelper::stringURLSafe($title);
 		$uid   = $this->faker->randomElement($this->categoryCreators);
 
-		/** @var CategoriesModelCategory $model */
-		$model  = BaseDatabaseModel::getInstance('Category', 'CategoriesModel');
+		if (version_compare(JVERSION, '3.999.999', 'le'))
+		{
+			/** @var CategoriesModelCategory $model */
+			$model  = BaseDatabaseModel::getInstance('Category', 'CategoriesModel');
+		}
+		else
+		{
+			/** @var MVCFactoryInterface $factory */
+			$factory = $this->bootComponent('com_categories')->getMVCFactory();
+			/** @var \Joomla\Component\Categories\Administrator\Model\CategoryModel $model */
+			$model = $factory->createModel('Category', 'Administrator');
+		}
+
 		$parent = $model->getItem($parent_id);
 
 		$data = [
@@ -375,8 +394,6 @@ class OverloadCLI extends OverloadApplicationCLI
 		];
 
 		// Save the category
-		/** @var CategoriesModelCategory $model */
-		$model  = BaseDatabaseModel::getInstance('Category', 'CategoriesModel');
 		$result = $model->save($data);
 
 		// If the save succeeded return the numeric category ID
@@ -477,8 +494,19 @@ class OverloadCLI extends OverloadApplicationCLI
 			'metadata'         => '{"tags":[]}',
 		];
 
-		/** @var ContentModelArticle $model */
-		$model  = BaseDatabaseModel::getInstance('Article', 'ContentModel');
+		if (version_compare(JVERSION, '3.999.999', 'le'))
+		{
+			/** @var ContentModelArticle $model */
+			$model  = BaseDatabaseModel::getInstance('Article', 'ContentModel');
+		}
+		else
+		{
+			/** @var MVCFactoryInterface $factory */
+			$factory = $this->bootComponent('com_content')->getMVCFactory();
+			/** @var Joomla\Component\Content\Administrator\Model\ArticleModel $model */
+			$model = $factory->createModel('Article', 'Administrator');
+		}
+
 		$result = $model->save($data);
 	}
 
@@ -608,16 +636,32 @@ class OverloadCLI extends OverloadApplicationCLI
 		// Delete all of the category articles.
 		$this->deleteArticlesInCategory($catID);
 
-		// Delete the category itself.
-		/** @var CategoriesTableCategory $table */
-		$table = Table::getInstance('Category', 'CategoriesTable');
+		$pks = [$catID];
 
-		/** @var CategoriesModelCategory $model */
-		$model = BaseDatabaseModel::getInstance('Category', 'CategoriesModel');
-		$pks   = [$catID];
+		if (version_compare(JVERSION, '3.999.999', 'le'))
+		{
+			// Delete the category itself.
+			/** @var CategoriesTableCategory $table */
+			$table = Table::getInstance('Category', 'CategoriesTable');
 
-		// Joomla requires me to trash before deleting
-		$table->publish($pks, -2);
+			/** @var CategoriesModelCategory $model */
+			$model = BaseDatabaseModel::getInstance('Category', 'CategoriesModel');
+
+			// Joomla requires me to trash before deleting
+			$table->publish($pks, -2);
+
+			if (!$model->delete($pks))
+			{
+				throw new RuntimeException($model->getError());
+			}
+		}
+
+		/** @var MVCFactoryInterface $factory */
+		$factory = $this->bootComponent('com_categories')->getMVCFactory();
+		/** @var \Joomla\Component\Categories\Administrator\Model\CategoryModel $model */
+		$model = $factory->createModel('Category', 'Administrator');
+
+		$model->publish($pks, -2);
 
 		if (!$model->delete($pks))
 		{
@@ -647,13 +691,42 @@ class OverloadCLI extends OverloadApplicationCLI
 			return;
 		}
 
-		/** @var ContentModelArticle $model */
-		$model = BaseDatabaseModel::getInstance('Article', 'ContentModel');
-		/** @var ContentTable $table */
-		$table = ContentTable::getInstance('Content');
+		$db         = Factory::getDbo();
+		$query      = $db->getQuery(true)
+			->select($db->qn('id'))
+			->from($db->qn('#__content'))
+			->where($db->qn('catid') . ' = ' . $db->q($catID))
+			->where($db->qn('state') . ' != -2');
+		$untrashedIDs = $db->setQuery($query)->loadColumn() ?? [];
 
-		// We must trash the articles before deleting them because that's the One True Joomla! Way
-		$table->publish($articleIDs, -2);
+		// Joomla 3
+		if (version_compare(JVERSION, '3.999.999', 'le'))
+		{
+			/** @var ContentModelArticle $model */
+			$model = BaseDatabaseModel::getInstance('Article', 'ContentModel');
+			/** @var ContentTable $table */
+			$table = ContentTable::getInstance('Content');
+
+			// We must trash the articles before deleting them because that's the One True Joomla! Way
+			$table->publish($untrashedIDs, -2);
+
+			if (!$model->delete($articleIDs))
+			{
+				throw new RuntimeException($model->getError());
+			}
+
+			return;
+		}
+
+		/** @var MVCFactoryInterface $factory */
+		$factory = $this->bootComponent('com_content')->getMVCFactory();
+		/** @var Joomla\Component\Content\Administrator\Model\ArticleModel $model */
+		$model = $factory->createModel('Article', 'Administrator');
+
+		if (!$model->publish($untrashedIDs, -2))
+		{
+			throw new RuntimeException($model->getError());
+		}
 
 		if (!$model->delete($articleIDs))
 		{

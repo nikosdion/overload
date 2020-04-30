@@ -7,16 +7,17 @@
 
 // Do not put the JEXEC or die check on this file
 
+use Joomla\CMS\Application\CliApplication;
+use Joomla\CMS\Application\ExtensionNamespaceMapper;
+use Joomla\CMS\Factory;
+use Joomla\Event\Dispatcher;
+use Joomla\Registry\Registry;
+use Joomla\Session\SessionInterface;
 use Overload\Cli\Traits\CGIModeAware;
 use Overload\Cli\Traits\CustomOptionsAware;
 use Overload\Cli\Traits\JoomlaConfigAware;
 use Overload\Cli\Traits\MemStatsAware;
 use Overload\Cli\Traits\TimeAgoAware;
-use Joomla\CMS\Application\CliApplication;
-use Joomla\CMS\Factory;
-use Joomla\Event\Dispatcher;
-use Joomla\Registry\Registry;
-use Joomla\Session\SessionInterface;
 
 /**
  * Load the legacy Joomla! include files
@@ -72,6 +73,8 @@ elseif (@file_exists($cmsImportFilePathOld))
  */
 abstract class OverloadCliApplicationJoomla4 extends CliApplication
 {
+	use ExtensionNamespaceMapper;
+
 	use CGIModeAware, CustomOptionsAware, JoomlaConfigAware, MemStatsAware, TimeAgoAware;
 
 	private $allowedToClose = false;
@@ -91,6 +94,9 @@ abstract class OverloadCliApplicationJoomla4 extends CliApplication
 	{
 		// Some servers only provide a CGI executable. While not ideal for running CLI applications we can make do.
 		$this->detectAndWorkAroundCGIMode();
+
+		// We need to tell Joomla to register its default namespace conventions
+		$this->createExtensionNamespaceMap();
 
 		// Initialize custom options handling which is a bit more straightforward than Input\Cli.
 		$this->initialiseCustomOptions();
