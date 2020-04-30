@@ -313,8 +313,16 @@ class OverloadCLI extends OverloadApplicationCLI
 		$refBase->setAccessible(true);
 		$refBase->setValue($base);
 
-		// Set up the SEF mode in the router
-		$this->getRouter()->setMode($this->get('sef', 0));
+		/**
+		 * Set up the SEF mode in the router.
+		 *
+		 * Only applicable on Joomla 3. The site router in Joomla 4 sets itself up automatically.
+		 */
+		if (version_compare(JVERSION, '3.9.9999', 'le'))
+		{
+			$this->getRouter()->setMode($this->get('sef', 0));
+		}
+
 	}
 
 	/**
