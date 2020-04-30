@@ -567,7 +567,6 @@ class OverloadCLI extends OverloadApplicationCLI
 				$db->qn('rgt'),
 			])
 			->from($db->qn('#__categories'))
-			->where($db->qn('extension') . ' = ' . $db->q('com_content'))
 			->where($db->qn('id') . ' = ' . $db->q($catID));
 		$rootInfo = $db->setQuery($query)->loadAssoc();
 
