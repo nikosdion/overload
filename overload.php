@@ -58,6 +58,9 @@ require_once __DIR__ . '/Overload/Cli/Application.php';
 
 // endregion
 
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
 class OverloadCLI extends OverloadApplicationCLI
 {
 	/**
@@ -269,7 +272,7 @@ class OverloadCLI extends OverloadApplicationCLI
 		return AbstractMenu::getInstance($name, $options);
 	}
 
-	public function isClient(?string $client = 'site')
+	public function isClient($client)
 	{
 		return $client === 'administrator';
 	}

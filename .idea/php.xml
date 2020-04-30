@@ -4,7 +4,8 @@
     <include_path>
       <path value="$PROJECT_DIR$/vendor/fzaninotto/faker" />
       <path value="$PROJECT_DIR$/vendor/composer" />
-      <path value="../../master/joomla-cms" />
+      <path value="../../master/joomla4" />
+      <path value="../../../Sites/dev4/configuration.php" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="7.1" />
