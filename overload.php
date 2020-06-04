@@ -10,6 +10,7 @@ use Joomla\CMS\Access\Access;
 use Joomla\CMS\Application\ApplicationHelper;
 use Joomla\CMS\Date\Date;
 use Joomla\CMS\Factory;
+use Joomla\CMS\Language\LanguageFactoryInterface;
 use Joomla\CMS\Menu\AbstractMenu;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
@@ -17,6 +18,7 @@ use Joomla\CMS\Router\Router;
 use Joomla\CMS\Table\Content as ContentTable;
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\Uri\Uri;
+use Joomla\CMS\User\User;
 
 // region Composer autoloader
 /** @var \Composer\Autoload\ClassLoader $autoloader */
@@ -126,6 +128,10 @@ class OverloadCLI extends OverloadApplicationCLI
 		// Create the Faker object
 		$this->faker = Faker\Factory::create();
 
+		// Load languages
+		$jLang = Factory::getLanguage();
+		$jLang->load('com_content', JPATH_ADMINISTRATOR, null);
+
 		// Tell Joomla where to find models and tables
 		BaseDatabaseModel::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_categories/models');
 		BaseDatabaseModel::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_content/models');
@@ -134,8 +140,11 @@ class OverloadCLI extends OverloadApplicationCLI
 
 		// Pretend that a Super User is logged in
 		$suIDs     = $this->getSuperUsers();
-		$superUser = \Joomla\CMS\User\User::getInstance($suIDs[0]);
+		$superUser = User::getInstance($suIDs[0]);
 		Factory::getSession()->set('user', $superUser);
+
+		// Joomla 4 still requires JPATH_COMPONENT :(
+		define('JPATH_COMPONENT', JPATH_ADMINISTRATOR . '/components/com_content');
 
 		if (empty($rootCategory))
 		{
@@ -446,7 +455,6 @@ class OverloadCLI extends OverloadApplicationCLI
 		$alias = ApplicationHelper::stringURLSafe($title);
 
 		$data = [
-			'id'               => 0,
 			'title'            => $title,
 			'alias'            => $alias,
 			'introtext'        => $this->getRandomParagraphs(1, false),
@@ -496,6 +504,8 @@ class OverloadCLI extends OverloadApplicationCLI
 
 		if (version_compare(JVERSION, '3.999.999', 'le'))
 		{
+			$data['id'] = 0;
+
 			/** @var ContentModelArticle $model */
 			$model  = BaseDatabaseModel::getInstance('Article', 'ContentModel');
 		}
@@ -508,6 +518,11 @@ class OverloadCLI extends OverloadApplicationCLI
 		}
 
 		$result = $model->save($data);
+
+		if (!$result)
+		{
+			throw new RuntimeException($model->getError());
+		}
 	}
 
 	/**

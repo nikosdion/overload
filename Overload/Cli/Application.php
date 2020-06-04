@@ -158,10 +158,9 @@ function OverloadCliExceptionHandler($ex)
 	echo "********** ERROR! **********\n\n";
 	echo $ex->getMessage();
 	echo "\n\nTechnical information:\n\n";
-	echo "Code: " . $ex->getCode() . "\n";
-	echo "File: " . $ex->getFile() . "\n";
-	echo "Line: " . $ex->getLine() . "\n";
-	echo "\nStack Trace:\n\n" . $ex->getTraceAsString();
+	echo sprintf("Code: %s\n", $ex->getCode());
+	echo sprintf("#000 %s(%s): \n", $ex->getFile(), $ex->getLine());
+	echo sprintf("\nStack Trace:\n\n%s", $ex->getTraceAsString());
 	echo "\n\n";
 	exit(254);
 }
@@ -259,11 +258,10 @@ function OverloadCliErrorHandler($errno, $errstr, $errfile, $errline)
 		case E_USER_ERROR:
 			echo "\n\n";
 			echo "********** ERROR! **********\n\n";
-			echo "PHP Fatal Error: $errstr";
+			echo sprintf("PHP Fatal Error: %s", $errstr);
 			echo "\n\nTechnical information:\n\n";
-			echo "File: " . $errfile . "\n";
-			echo "Line: " . $errline . "\n";
-			echo "\nStack Trace:\n\n" . debug_backtrace();
+			echo sprintf("#000 %s(%s): \n", $errfile, $errline);
+			echo sprintf("\nStack Trace:\n\n%s", debug_backtrace());
 			echo "\n\n";
 
 			exit(252);

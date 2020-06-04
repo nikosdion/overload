@@ -10,6 +10,7 @@
 use Joomla\CMS\Application\CliApplication;
 use Joomla\CMS\Application\ExtensionNamespaceMapper;
 use Joomla\CMS\Factory;
+use Joomla\CMS\User\User;
 use Joomla\Event\Dispatcher;
 use Joomla\Registry\Registry;
 use Joomla\Session\SessionInterface;
@@ -185,6 +186,42 @@ abstract class OverloadCliApplicationJoomla4 extends CliApplication
 	public function getSession()
 	{
 		return $this->getContainer()->get('session.cli');
+	}
+
+	/**
+	 * Gets a user state.
+	 *
+	 * @param   string  $key      The path of the state.
+	 * @param   mixed   $default  Optional default value, returned if the internal value is null.
+	 *
+	 * @return  mixed  The user state or null.
+	 *
+	 * @since   3.2
+	 */
+	public function getUserState($key, $default = null)
+	{
+		$registry = $this->getSession()->get('registry');
+
+		if ($registry !== null)
+		{
+			return $registry->get($key, $default);
+		}
+
+		return $default;
+	}
+
+	/**
+	 * Get the application identity.
+	 *
+	 * @return  User
+	 *
+	 * @since   4.0.0
+	 */
+	public function getIdentity()
+	{
+		$dummyUser = new Joomla\CMS\User\User();
+
+		return Factory::getSession()->get('user', $dummyUser);
 	}
 
 }
