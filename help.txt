@@ -1,3 +1,11 @@
+Download or clone
+cd /home/user
+Download the zip file (under Code > Download Zip) or clone the repository using: git clone https://github.com/nikosdion/overload.git
+
+Install the dependencies
+Composer must be installed.
+Inside the "oveload" folder, run: composer install
+
 Usage: /path/to/php /another/path/to/overload.php [OPTIONS]
 
 This script must be run from the cli folder of your site. Example:
