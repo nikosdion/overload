@@ -4,9 +4,10 @@ Download the zip file (under Code > Download Zip) or clone the repository using:
 
 Install the dependencies
 Composer must be installed.
-Inside the "oveload" folder, run: composer install
+Go inside the "overload" folder: cd overload
+run: composer install
 
-Usage: /path/to/php /another/path/to/overload.php [OPTIONS]
+Usage: /path/to/php /home/user/overload/overload.php [OPTIONS]
 
 This script must be run from the cli folder of your site. Example:
     cd /var/www/joomlasite/cli
