@@ -1,3 +1,13 @@
+# 🚨🚨 This repository is no logner maintained 🚨🚨
+
+This code started as a component back in the Joomla! 1.6 development days to demonstrate the exponential slowness experienced adding new articles back then. It helped create massive amoutns of contents which helped people improve Joomla!.
+
+Between then and 2019 I was using this code to generate large amounts of (random) content to simulate a worst case situation in my development site.
+
+By 2019 I made a different kind of dev site which was a far better approximation of a real-world site. I also adapted these scripts and eventually created Joomla! console plugins to generate even better structured large amounts of random content, including content for my extensions such as Engage. This repository has not been updated since. Five years later, I decided to put it out of its misery.
+
+So long, Overload!. You served us well. 🫡
+
 # Overload!
 
 Mass Joomla! 3 and 4 sample content creator
